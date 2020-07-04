@@ -1,0 +1,42 @@
+version: '3'
+services:
+  shortly-fpm:
+    build:
+      context: ./.docker/php-fpm
+      dockerfile: Dockerfile
+    container_name: shortly_php_fpm
+    user: $UID:$GID
+    volumes:
+      - .:/app
+      - /etc/group:/etc/group:ro
+      - /etc/passwd:/etc/passwd:ro
+      - /etc/shadow:/etc/shadow:ro
+
+  shortly-nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./.docker/nginx/conf:/etc/nginx/conf.d
+      - .:/app
+      - ./.docker/nginx/logs:/var/log/nginx/
+    depends_on:
+      - shortly-fpm
+
+  mysql:
+    image: mysql:latest
+    ports:
+      - "3306:3306"
+    container_name: mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=qwerty
+      - MYSQL_DATABASE=shortly
+      - MYSQL_USER=main
+      - MYSQL_PASSWORD=qwerty
+    volumes:
+      - shortly_mysql_data:/var/lib/mysql
+
+volumes:
+  shortly_mysql_data:
+    driver: "local"
