@@ -1,42 +1,61 @@
 version: '3'
 services:
-  shortly-fpm:
+  app:
     build:
-      context: ./.docker/php-fpm
+      context: .
       dockerfile: Dockerfile
-    container_name: shortly_php_fpm
-    user: $UID:$GID
+    image: digitalocean.com/php
+    container_name: app
+    restart: unless-stopped
+    tty: true
+    environment:
+      SERVICE_NAME: app
+      SERVICE_TAGS: dev
+    working_dir: /var/www
     volumes:
-      - .:/app
-      - /etc/group:/etc/group:ro
-      - /etc/passwd:/etc/passwd:ro
-      - /etc/shadow:/etc/shadow:ro
+      - ./:/var/www
+      - ./.docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    networks:
+      - app-network
 
-  shortly-nginx:
-    image: nginx:latest
+  webserver:
+    image: nginx:alpine
+    container_name: webserver
+    restart: unless-stopped
+    tty: true
     ports:
       - "80:80"
       - "443:443"
     volumes:
-      - ./.docker/nginx/conf:/etc/nginx/conf.d
-      - .:/app
-      - ./.docker/nginx/logs:/var/log/nginx/
-    depends_on:
-      - shortly-fpm
+      - ./:/var/www
+      - ./.docker/nginx/conf.d/:/etc/nginx/conf.d/
+    networks:
+      - app-network
 
-  mysql:
-    image: mysql:latest
+  db:
+    image: mysql:5.7.22
+    container_name: db
+    restart: unless-stopped
+    tty: true
     ports:
       - "3306:3306"
-    container_name: mysql
     environment:
-      - MYSQL_ROOT_PASSWORD=qwerty
-      - MYSQL_DATABASE=shortly
-      - MYSQL_USER=main
-      - MYSQL_PASSWORD=qwerty
+      MYSQL_DATABASE: shortly
+      MYSQL_ROOT_PASSWORD: qwerty
+      MYSQL_USER: main
+      MYSQL_PASSWORD: qwerty
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
     volumes:
-      - shortly_mysql_data:/var/lib/mysql
+      - dbdata:/var/lib/mysql/
+      - ./.docker/mysql/my.cnf:/etc/mysql/my.cnf
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
 
 volumes:
-  shortly_mysql_data:
-    driver: "local"
+  dbdata:
+    driver: local
