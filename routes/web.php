@@ -14,5 +14,5 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::post('/', 'LinkController@create')->middleware(\App\Http\Middleware\CheckToken::class);
-Route::get('/{hash}', 'LinkController@redirect')->name('link.redirect');
+Route::get('/{hash}', 'LinkController@redirect')->name('link.redirect')->middleware(\App\Http\Middleware\LimitRequestCount::class);
 

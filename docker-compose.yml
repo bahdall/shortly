@@ -52,6 +52,16 @@ services:
     networks:
       - app-network
 
+  redis:
+    image: redis
+    restart: always
+    ports:
+      - "6377:6379"
+    networks:
+      - app-network
+    volumes:
+      - redis-data:/data
+
 networks:
   app-network:
     driver: bridge
@@ -59,3 +69,4 @@ networks:
 volumes:
   dbdata:
     driver: local
+  redis-data:
