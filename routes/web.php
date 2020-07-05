@@ -13,6 +13,6 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::post('/', 'LinkController@create')->middleware(\App\Http\Middleware\CheckToken::class);
+Route::get('/{hash}', 'LinkController@redirect')->name('link.redirect');
+
