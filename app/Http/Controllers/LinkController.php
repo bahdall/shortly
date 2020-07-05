@@ -10,7 +10,9 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Routing\UrlGenerator;
+use Psr\SimpleCache\InvalidArgumentException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Throwable;
 
 class LinkController extends BaseController
 {
@@ -32,7 +34,7 @@ class LinkController extends BaseController
      * @param CreateLink $createLink
      * @param UrlGenerator $urlGenerator
      * @return JsonResponse
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function create(CreateLink $createLink, UrlGenerator $urlGenerator)
     {
@@ -47,6 +49,13 @@ class LinkController extends BaseController
         return new JsonResponse(['url' => $redirectUrl]);
     }
 
+    /**
+     * @param string $hash
+     * @param Request $request
+     * @param LinksLoggerInterface $linksLogger
+     * @return RedirectResponse
+     * @throws InvalidArgumentException
+     */
     public function redirect(string $hash, Request $request, LinksLoggerInterface $linksLogger)
     {
         $link = $this->linkShorterService->findByHash($hash);

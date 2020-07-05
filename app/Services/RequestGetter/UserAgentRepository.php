@@ -5,9 +5,24 @@ namespace App\Services\RequestGetter;
 
 use App\Contracts\RequestRepositoryInterface;
 use App\Models\UserAgent;
+use Psr\SimpleCache\CacheInterface;
+use Psr\SimpleCache\InvalidArgumentException;
 
 class UserAgentRepository implements RequestRepositoryInterface
 {
+    /**
+     * @var CacheInterface
+     */
+    private $cache;
+
+    /**
+     * UserAgentRepository constructor.
+     * @param CacheInterface $cache
+     */
+    public function __construct(CacheInterface $cache)
+    {
+        $this->cache = $cache;
+    }
 
     /**
      * @param string $value
@@ -27,11 +42,19 @@ class UserAgentRepository implements RequestRepositoryInterface
     /**
      * @param string $value
      * @return int|null
+     * @throws InvalidArgumentException
      */
     public function getIdByValue(string $value): ?int
     {
-        /** @var UserAgent $model */
-        $model = UserAgent::where('value', $value)->first();
+        $cacheKey = $this->getCacheKey($value);
+
+        if ($this->cache->has($cacheKey)) {
+            $model = $this->cache->get($cacheKey);
+        } else {
+            /** @var UserAgent $model */
+            $model = UserAgent::where('value', $value)->first();
+            $this->cache->set($cacheKey, $model, 60);
+        }
 
         if (is_null($model)) {
             return null;
@@ -51,5 +74,14 @@ class UserAgentRepository implements RequestRepositoryInterface
         $model->save();
 
         return $model->id;
+    }
+
+    /**
+     * @param string $value
+     * @return string
+     */
+    private function getCacheKey(string $value): string
+    {
+        return sha1(__CLASS__.':'.$value);
     }
 }

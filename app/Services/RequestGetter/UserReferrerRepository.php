@@ -4,10 +4,26 @@ declare(strict_types=1);
 namespace App\Services\RequestGetter;
 
 use App\Contracts\RequestRepositoryInterface;
+use App\Models\UserAgent;
 use App\Models\UserReferrer;
+use Psr\SimpleCache\CacheInterface;
+use Psr\SimpleCache\InvalidArgumentException;
 
 class UserReferrerRepository implements RequestRepositoryInterface
 {
+    /**
+     * @var CacheInterface
+     */
+    private $cache;
+
+    /**
+     * UserAgentRepository constructor.
+     * @param CacheInterface $cache
+     */
+    public function __construct(CacheInterface $cache)
+    {
+        $this->cache = $cache;
+    }
 
     /**
      * @param string $value
@@ -27,11 +43,19 @@ class UserReferrerRepository implements RequestRepositoryInterface
     /**
      * @param string $value
      * @return int|null
+     * @throws InvalidArgumentException
      */
     public function getIdByValue(string $value): ?int
     {
-        /** @var UserReferrer $model */
-        $model = UserReferrer::where('value', $value)->first();
+        $cacheKey = $this->getCacheKey($value);
+
+        if ($this->cache->has($cacheKey)) {
+            $model = $this->cache->get($cacheKey);
+        } else {
+            /** @var UserReferrer $model */
+            $model = UserReferrer::where('value', $value)->first();
+            $this->cache->set($cacheKey, $model, 60);
+        }
 
         if (is_null($model)) {
             return null;
@@ -51,5 +75,14 @@ class UserReferrerRepository implements RequestRepositoryInterface
         $model->save();
 
         return $model->id;
+    }
+
+    /**
+     * @param string $value
+     * @return string
+     */
+    private function getCacheKey(string $value): string
+    {
+        return sha1(__CLASS__.':'.$value);
     }
 }
