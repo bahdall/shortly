@@ -1,0 +1,47 @@
+<?php
+declare(strict_types=1);
+
+namespace App\Services\LinksLogger;
+
+use App\Contracts\LinksLoggerInterface;
+use App\Models\Link;
+use App\Models\Log;
+use App\Services\RequestGetter\RequestGetter;
+use App\Services\RequestGetter\UserAgentRepository;
+use App\Services\RequestGetter\UserIpRepository;
+use App\Services\RequestGetter\UserReferrerRepository;
+
+class LinksLogger implements LinksLoggerInterface
+{
+    /**
+     * @var RequestGetter
+     */
+    private $requestGetter;
+
+    /**
+     * LinksLogger constructor.
+     * @param RequestGetter $requestGetter
+     */
+    public function __construct(RequestGetter $requestGetter)
+    {
+        $this->requestGetter = $requestGetter;
+    }
+
+    /**
+     * @param Link $link
+     * @param string $userAgent
+     * @param string $userIp
+     * @param string $referrer
+     * @return mixed|void
+     */
+    public function log(Link $link, ?string $userAgent, ?string $userIp, ?string $referrer): void
+    {
+        $log = new Log();
+        $log->link_id = $link->id;
+        $log->token_id = $link->token_id;
+        $log->user_agent_id = !is_null($userAgent) ? $this->requestGetter->setRepository(new UserAgentRepository())->getIdByValue($userAgent) : null;
+        $log->user_ip_id = !is_null($userIp) ? $this->requestGetter->setRepository(new UserIpRepository())->getIdByValue($userIp) : null;
+        $log->referrer_id = !is_null($referrer) ? $this->requestGetter->setRepository(new UserReferrerRepository())->getIdByValue($referrer) : null;
+        $log->save();
+    }
+}

@@ -176,6 +176,7 @@ return [
         App\Providers\RouteServiceProvider::class,
         App\Providers\TokenServiceProvider::class,
         App\Providers\HashLinkServiceProvider::class,
+        App\Providers\LinksLoggerServiceProvider::class,
 
     ],
 

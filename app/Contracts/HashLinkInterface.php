@@ -5,5 +5,9 @@ namespace App\Contracts;
 
 interface HashLinkInterface
 {
+    /**
+     * @param string $url
+     * @return string
+     */
     public function hash(string $url): string;
 }

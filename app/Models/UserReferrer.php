@@ -16,5 +16,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class UserReferrer extends Model
 {
+    protected $table = 'referrers';
+
     public $timestamps = false;
 }

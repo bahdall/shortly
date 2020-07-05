@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Contracts\LinksLoggerInterface;
 use App\Http\Requests\CreateLink;
 use App\Services\LinkShorter\LinkShorterService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Routing\UrlGenerator;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -45,7 +47,7 @@ class LinkController extends BaseController
         return new JsonResponse(['url' => $redirectUrl]);
     }
 
-    public function redirect(string $hash)
+    public function redirect(string $hash, Request $request, LinksLoggerInterface $linksLogger)
     {
         $link = $this->linkShorterService->findByHash($hash);
 
@@ -53,6 +55,7 @@ class LinkController extends BaseController
             throw new NotFoundHttpException('not found');
         }
 
+        $linksLogger->log($link, $request->userAgent(), $request->ip(), $request->header('referrer'));
         return new RedirectResponse($link->url);
     }
 }
