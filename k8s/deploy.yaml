@@ -23,7 +23,7 @@ spec:
             - mountPath: /mnt
               name: shared-files
       containers:
-        - image: nginx
+        - image: nginx:alpine
           name: shortly-nginx
           envFrom:
             - configMapRef:
@@ -32,9 +32,12 @@ spec:
             - containerPort: 80
               protocol: TCP
           volumeMounts:
-            - name: nginx-config-volume
+            - name: nginx-config-volume-shortly
               mountPath: /etc/nginx/sites-enabled/shortly.conf
               subPath: shortly.conf
+            - name: nginx-config-volume-nginx
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
             - name: shared-files
               mountPath: /var/shortly/public
           resources:
@@ -70,7 +73,10 @@ spec:
             - name: shared-files
               mountPath: /mnt
       volumes:
-        - name: nginx-config-volume
+        - name: nginx-config-volume-shortly
+          configMap:
+            name: shortly-nginx-configmap
+        - name: nginx-config-volume-nginx
           configMap:
             name: shortly-nginx-configmap
         - name: shared-files
