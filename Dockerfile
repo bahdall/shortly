@@ -1,5 +1,8 @@
 FROM php:7.2-fpm
 
+#COPY .docker/php/www.conf /usr/local/etc/php-fpm.d/www.conf
+COPY .docker/php/local.ini /usr/local/etc/php/php.ini
+
 # Copy composer.lock and composer.json
 COPY composer.lock composer.json /var/www/
 

@@ -44,7 +44,7 @@ class LimitRequestCount
 
         $key = $this->resolveRequestSignature($request);
 
-        if ($response->getStatusCode() == Response::HTTP_NOT_FOUND) {
+        if ($response->getStatusCode() === Response::HTTP_NOT_FOUND) {
             if ($this->limiter->tooManyAttempts($key, $maxAttempts)) {
                 throw $this->buildException($key);
             }
