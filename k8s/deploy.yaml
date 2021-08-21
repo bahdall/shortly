@@ -16,7 +16,7 @@ spec:
     spec:
       initContainers:
         - name: assets
-          image: bahdall/shortly-php-fpm-prod:latest
+          image: bahdall/shortly-php-fpm-prod:{{image_tag}}
           command: ["/bin/sh", "-c", "cp -r /var/www/public/* /mnt/;"]
           imagePullPolicy: Always
           volumeMounts:
@@ -45,7 +45,7 @@ spec:
               memory: "100Mi"
               cpu: "500m"
 
-        - image: bahdall/shortly-php-fpm-prod:latest
+        - image: bahdall/shortly-php-fpm-prod:{{image_tag}}
           name: shortly-phpfpm
           envFrom:
             - configMapRef:
