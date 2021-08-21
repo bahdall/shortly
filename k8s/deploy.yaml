@@ -4,7 +4,7 @@ metadata:
   name: shortly-nginx-phpfpm
   namespace: shortly-prod
 spec:
-  replicas: 2
+  replicas: 1
   progressDeadlineSeconds: 300
   selector:
     matchLabels:
@@ -14,6 +14,14 @@ spec:
       labels:
         app: shortly-app
     spec:
+      initContainers:
+        - name: assets
+          image: bahdall/shortly-php-fpm-prod:latest
+          command: ["/bin/sh", "-c", "cp -r /var/shortly/public/* /mnt/;"]
+          imagePullPolicy: Always
+          volumeMounts:
+            - mountPath: /mnt
+              name: shared-files
       containers:
         - image: nginx
           name: shortly-nginx
