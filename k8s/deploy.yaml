@@ -40,8 +40,6 @@ spec:
         - image: bahdall/shortly-php-fpm-prod:latest
           name: shortly-phpfpm
           envFrom:
-            - secretRef:
-                name: prod-secrets
             - configMapRef:
                 name: shortly-configmap
           ports:
