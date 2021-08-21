@@ -17,7 +17,7 @@ spec:
       initContainers:
         - name: assets
           image: bahdall/shortly-php-fpm-prod:latest
-          command: ["/bin/sh", "-c", "cp -r /var/shortly/public/* /mnt/;"]
+          command: ["/bin/sh", "-c", "cp -r /var/www/public/* /mnt/;"]
           imagePullPolicy: Always
           volumeMounts:
             - mountPath: /mnt
@@ -69,10 +69,6 @@ spec:
           volumeMounts:
             - name: shared-files
               mountPath: /mnt
-          lifecycle:
-            postStart:
-              exec:
-                command: ["/bin/sh", "-c", "cp -r /var/shortly/public/* /mnt/;"]
       volumes:
         - name: nginx-config-volume
           configMap:
